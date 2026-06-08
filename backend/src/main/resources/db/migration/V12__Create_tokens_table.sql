@@ -1,0 +1,8 @@
+-- Create tokens table
+CREATE TABLE IF NOT EXISTS tokens (
+
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(512) UNIQUE NOT NULL,
+    refresh_token VARCHAR(512) UNIQUE NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

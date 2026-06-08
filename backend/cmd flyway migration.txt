@@ -1,0 +1,13 @@
+run---- chạy migration tiếp theo
+mvn -Dflyway.url="jdbc:mysql://localhost:3306/language_center?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true" -Dflyway.user=root -Dflyway.password=123456 flyway:migrate
+backup--- db hiện tại ổn, lưu làm backup
+mysqldump -u root -p language_center > language_center_backup.sql
+restore--- db hiện tại có vấn đề, quay về file backup
+mysql -u DB_USER -p DB_NAME < language_center_backup.sql
+check status------ kiểm tra status 
+mysql -u root -p -e "USE language_center; SELECT installed_rank, version, description, success, installed_on FROM flyway_schema_history ORDER BY installed_rank;"
+delete ------- xóa các hoạt động sau khi backup <về lại backup>
+mvn -Dflyway.url="jdbc:mysql://localhost:3306/language_center?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true" -Dflyway.user=root -Dflyway.password=123456 flyway:repair
+drop---- xóa bảng, như dưới là roles và users
+mysql -u root -p -e "USE language_center; DROP TABLE IF EXISTS roles, users;"
+Chạy service mysql trước khi install hoặc run

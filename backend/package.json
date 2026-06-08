@@ -1,0 +1,13 @@
+{
+  "description": "Backend API for Language Center Management System",
+  "scripts": {
+    "dev": ".\\mvnw spring-boot:run",
+    "build": ".\\mvnw clean package",
+     "newman:base": "npx newman run docs/postman/Language_Center-Manual_Test_Cases.postman_collection.json --env-var baseUrl=http://localhost:8080 --delay-request 333",
+
+    "test:api": "npm run newman:base",
+
+    "test:api:report": "npm run newman:base -- -r cli,json --reporter-json-export ../docs/automation/test-results.json"
+ 
+  }
+}
