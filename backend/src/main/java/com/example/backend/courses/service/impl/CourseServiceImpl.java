@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -39,6 +41,7 @@ public class CourseServiceImpl implements CourseService {
         private final ClassMapper classMapper;
 
         @Override
+        @Cacheable(value = "courses", key = "{#keyword, #visibleOnly}")
         public List<CourseResponse> getAllCourses(String keyword, boolean visibleOnly) {
                 List<String> normalizedKeywords = normalizeKeyword(keyword);
                 List<Course> courses = (normalizedKeywords.isEmpty()
@@ -67,6 +70,7 @@ public class CourseServiceImpl implements CourseService {
         }
 
         @Override
+        @Cacheable(value = "course_classes", key = "{#courseId, #visibleOnly}")
         public List<ClassResponse> getClassesByCourseId(Long courseId, boolean visibleOnly) {
                 java.time.LocalDateTime now = java.time.LocalDateTime.now();
                 List<EntityClass> classes = visibleOnly
@@ -88,6 +92,7 @@ public class CourseServiceImpl implements CourseService {
         }
 
         @Override
+        @CacheEvict(value = {"courses", "course_classes"}, allEntries = true)
         public CourseResponse createCourse(CourseRequest courseCreateRequest) {
                 // Map request to entity
                 var courseEntity = courseMapper.toEntity(courseCreateRequest);
@@ -100,6 +105,7 @@ public class CourseServiceImpl implements CourseService {
         }
 
         @Override
+        @CacheEvict(value = {"courses", "course_classes"}, allEntries = true)
         public CourseResponse updateCourse(Long courseId, CourseRequest courseRequest) {
                 // Find existing course
                 var existingCourse = courseRepository.findById(courseId)
@@ -116,6 +122,7 @@ public class CourseServiceImpl implements CourseService {
         }
 
         @Override
+        @CacheEvict(value = {"courses", "course_classes"}, allEntries = true)
         public void deleteCourse(Long courseId) {
                 Course course = courseRepository.findById(courseId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));

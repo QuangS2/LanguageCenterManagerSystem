@@ -1,6 +1,8 @@
 package com.example.backend.discounts.service.impl;
 
 import java.util.List;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.discounts.dto.request.DiscountRequest;
@@ -22,6 +24,7 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"discounts", "discounts_all", "discounts_active"}, allEntries = true)
     public DiscountResponse createDiscount(DiscountRequest request) {
         // Validate discount percent is valid (0-100)
         validateDiscountPercent(request.getDiscountPercent());
@@ -34,6 +37,7 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"discounts", "discounts_all", "discounts_active"}, allEntries = true)
     public DiscountResponse updateDiscount(Long id, DiscountRequest request) {
         Discount discount = discountRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Discount not found"));
@@ -51,6 +55,7 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
+    @Cacheable(value = "discounts", key = "#id")
     public DiscountResponse getDiscountById(Long id) {
         Discount discount = discountRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Discount not found"));
@@ -58,6 +63,7 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
+    @Cacheable(value = "discounts_all")
     public List<DiscountResponse> getAllDiscounts() {
         List<Discount> discounts = discountRepository.findAll();
         return discounts.stream()
@@ -66,6 +72,7 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
+    @Cacheable(value = "discounts_active")
     public List<DiscountResponse> getActiveDiscounts() {
         List<Discount> discounts = discountRepository.findByActiveTrue();
         return discounts.stream()
@@ -75,6 +82,7 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"discounts", "discounts_all", "discounts_active"}, allEntries = true)
     public void deleteDiscount(Long id) {
         if (!discountRepository.existsById(id)) {
             throw new ResourceNotFoundException("Discount not found");

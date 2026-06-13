@@ -1,6 +1,8 @@
 package com.example.backend.schedules.service.impl;
 
 import java.util.List;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.classes.model.EntityClass;
@@ -25,6 +27,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"schedules", "schedules_all", "schedules_by_class", "schedules_by_teacher"}, allEntries = true)
     public ScheduleResponse createSchedule(ScheduleRequest request) {
         // Validate class exists
         EntityClass classEntity = classRepository.findById(request.getClassId())
@@ -44,6 +47,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"schedules", "schedules_all", "schedules_by_class", "schedules_by_teacher"}, allEntries = true)
     public ScheduleResponse updateSchedule(Long id, ScheduleRequest request) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Schedule not found"));
@@ -63,6 +67,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
+    @Cacheable(value = "schedules", key = "#id")
     public ScheduleResponse getScheduleById(Long id) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Schedule not found"));
@@ -70,6 +75,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
+    @Cacheable(value = "schedules_all")
     public List<ScheduleResponse> getAllSchedules() {
         List<Schedule> schedules = scheduleRepository.findAll();
         return schedules.stream()
@@ -78,6 +84,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
+    @Cacheable(value = "schedules_by_class", key = "#classId")
     public List<ScheduleResponse> getSchedulesByClassId(Long classId) {
         List<Schedule> schedules = scheduleRepository.findByClassEntityId(classId);
         return schedules.stream()
@@ -86,6 +93,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
+    @Cacheable(value = "schedules_by_teacher", key = "#teacherId")
     public List<ScheduleResponse> getSchedulesByTeacherId(Long teacherId) {
         List<Schedule> schedules = scheduleRepository.findByClassEntityTeacherId(teacherId);
         return schedules.stream()
@@ -95,6 +103,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"schedules", "schedules_all", "schedules_by_class", "schedules_by_teacher"}, allEntries = true)
     public void deleteSchedule(Long id) {
         if (!scheduleRepository.existsById(id)) {
             throw new ResourceNotFoundException("Schedule not found");

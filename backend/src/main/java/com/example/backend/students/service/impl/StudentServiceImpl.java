@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import com.example.backend.account.repository.UserRepository;
 import com.example.backend.classes.dto.response.ClassResponse;
@@ -47,6 +49,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         @Override
+        @Cacheable(value = "student_schedules", key = "#studentId")
         public List<ScheduleResponse> getSchedulesByStudentId(Long studentId) {
                 Student student = studentRepository.findById(studentId)
                                 .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -64,6 +67,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         @Override
+        @Cacheable(value = "student_classes", key = "#studentId")
         public List<ClassResponse> getClassesByStudentId(Long studentId) {
                 studentRepository.findById(studentId)
                                 .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -79,6 +83,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         @Override
+        @Cacheable(value = "students_all")
         public List<StudentResponse> getAllStudents() {
                 return studentRepository.findAll().stream()
                                 .map(studentMapper::toResponse)
@@ -86,6 +91,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         @Override
+        @Cacheable(value = "students", key = "#id")
         public StudentResponse getStudentById(Long id) {
                 Student student = studentRepository.findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
@@ -93,6 +99,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         @Override
+        @CacheEvict(value = {"students", "students_all", "student_schedules", "student_classes"}, allEntries = true)
         public StudentResponse updateStudent(Long id, StudentRequest studentRequest) {
                 Student student = studentRepository.findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));

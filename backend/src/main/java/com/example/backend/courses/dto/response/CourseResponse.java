@@ -2,9 +2,11 @@ package com.example.backend.courses.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class CourseResponse {
     
     private Long id;

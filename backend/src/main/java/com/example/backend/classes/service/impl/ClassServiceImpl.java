@@ -1,7 +1,8 @@
 package com.example.backend.classes.service.impl;
 
 import java.util.List;
-
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.account.service.UserService;
@@ -38,6 +39,7 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"classes", "classes_all", "classes_by_course", "classes_by_teacher"}, allEntries = true)
     public ClassResponse createClass(ClassRequest request) {
         // Validate course exists
         Course course = courseRepository.findById(request.getCourseId())
@@ -75,6 +77,7 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"classes", "classes_all", "classes_by_course", "classes_by_teacher"}, allEntries = true)
     public ClassResponse updateClass(Long id, ClassRequest request) {
         EntityClass classEntity = classRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Class not found"));
@@ -124,6 +127,7 @@ public class ClassServiceImpl implements ClassService {
     }
 
     @Override
+    @Cacheable(value = "classes", key = "#id")
     public ClassResponse getClassById(Long id) {
         EntityClass classEntity = classRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Class not found"));
@@ -131,6 +135,7 @@ public class ClassServiceImpl implements ClassService {
     }
 
     @Override
+    @Cacheable(value = "classes_all")
     public List<ClassResponse> getAllClasses() {
         List<EntityClass> classes = classRepository.findAll();
         return classes.stream()
@@ -139,6 +144,7 @@ public class ClassServiceImpl implements ClassService {
     }
 
     @Override
+    @Cacheable(value = "classes_by_course", key = "#courseId")
     public List<ClassResponse> getClassesByCourseId(Long courseId) {
         List<EntityClass> classes = classRepository.findByCourseId(courseId);
         return classes.stream()
@@ -148,6 +154,7 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"classes", "classes_all", "classes_by_course", "classes_by_teacher"}, allEntries = true)
     public void deleteClass(Long id) {
         if (!classRepository.existsById(id)) {
             throw new ResourceNotFoundException("Class not found");
@@ -156,6 +163,7 @@ public class ClassServiceImpl implements ClassService {
     }
 
     @Override
+    @Cacheable(value = "classes_by_teacher", key = "#teacherId")
     public List<ClassResponse> getClassesByTeacherId(Long teacherId) {
         List<EntityClass> classes = classRepository.findByTeacherId(teacherId);
         return classes.stream()

@@ -3,10 +3,12 @@ package com.example.backend.students.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class StudentResponse {
      //student id, user id (relationship with user), date of birth, phone, address
     private Long id;
